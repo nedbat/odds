@@ -1,3 +1,5 @@
+"""CSV review tool."""
+
 import csv
 import os.path
 import sys
@@ -5,6 +7,22 @@ import textwrap
 
 import colorama
 from colorama import Fore, Back, Style
+
+def print_row(d):
+    print(f"\n{Fore.YELLOW}{'#'*100}{Fore.RESET}")
+    prev_post = ""
+    for k, v in d.items():
+        v = "\n".join(textwrap.fill(p, width=100) for p in v.splitlines())
+        v = v.strip()
+        if "\n" in v:
+            pre = "\n"
+            sep = "\n"
+        else:
+            pre = ""
+            sep = ":\t"
+
+        print(f"{prev_post or pre}{Style.BRIGHT}{k}{Style.NORMAL}{sep}{v}")
+        prev_post = pre
 
 COMMENTS_FILE = "comments.csv"
 
@@ -29,22 +47,6 @@ def add_comment(comments, rownum, comment):
     comment = old_comment + comment
     comments[rownum] = comment.strip()
     write_comments(comments)
-
-def print_row(d):
-    print(f"\n{Fore.YELLOW}{'#'*100}{Fore.RESET}")
-    next_post = ""
-    for k, v in d.items():
-        v = "\n".join(textwrap.fill(p, width=100) for p in v.splitlines())
-        v = v.strip()
-        if "\n" in v:
-            pre = "\n"
-            sep = "\n"
-        else:
-            pre = ""
-            sep = ":\t"
-
-        print(f"{next_post or pre}{Style.BRIGHT}{k}{Style.NORMAL}{sep}{v}")
-        next_post = pre
 
 def main():
     colorama.init()
