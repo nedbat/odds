@@ -36,7 +36,7 @@ def read_comments():
 
 def write_comments(comments):
     with open(COMMENTS_FILE, "w") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         for k in sorted(comments):
             writer.writerow((k, comments[k]))
 
@@ -75,7 +75,10 @@ def main():
             last_shown = row
 
         try:
-            cmd = input(f"{Style.BRIGHT}{row}{Style.NORMAL} >> ").strip()
+            # XXX: Workaround `input` not displaying ANSI on Windows
+            # https://bugs.python.org/issue17337
+            print(f"{Style.BRIGHT}{row}{Style.NORMAL} >> ", end="")
+            cmd = input().strip()
         except (EOFError, KeyboardInterrupt):
             print("\nbye")
             break
