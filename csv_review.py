@@ -9,7 +9,7 @@ import colorama
 from colorama import Fore, Back, Style
 
 def print_row(d):
-    print(f"\n{Fore.YELLOW}{'#'*100}{Fore.RESET}")
+    print(f"\n\n\n\n\n\n\n\n{Fore.YELLOW}{'#'*100}{Fore.RESET}")
     prev_post = ""
     for k, v in d.items():
         v = "\n".join(textwrap.fill(p, width=100) for p in v.splitlines())
