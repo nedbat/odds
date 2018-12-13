@@ -23,8 +23,9 @@ def print_row(d):
             pre = ""
             sep = ":\t"
 
-        print(f"{prev_post or pre}{Style.BRIGHT}{k}{Style.NORMAL}{sep}{v}")
-        prev_post = pre
+        if v:
+            print(f"{prev_post or pre}{Style.BRIGHT}{k}{Style.NORMAL}{sep}{v}")
+            prev_post = pre
 
 COMMENTS_FILE = "comments.csv"
 
