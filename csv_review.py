@@ -50,15 +50,26 @@ def add_comment(comments, rownum, comment):
     comments[rownum] = comment.strip()
     write_comments(comments)
 
+class MultiHeadDictReader:
+    """A simple DictReader-like thing that can use a few rows for the headers."""
+    def __init__(self, csvfile, header=1):
+        self.reader = csv.reader(csvfile)
+        self.fieldnames = next(self.reader)
+        for _ in range(header-1):
+            self.fieldnames = [(a + " " + b).strip() for a, b in zip(self.fieldnames, next(self.reader))]
+
+    def __iter__(self):
+        for row in self.reader:
+            yield dict(zip(self.fieldnames, row))
+
+
 @click.command()
 @click.option('--header', default=1, help="Row number with headers")
 @click.argument('csvfile', type=click.File('r'))
 def main(header, csvfile):
     colorama.init()
 
-    for _ in range(header-1):
-        next(csvfile)
-    rows = list(csv.DictReader(csvfile))
+    rows = list(MultiHeadDictReader(csvfile, header=header))
 
     rows.insert(0, {})  # Fieldnames
     rows.insert(0, {})  # 1-origin
