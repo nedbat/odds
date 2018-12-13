@@ -72,14 +72,15 @@ def main(header, csvfile):
 
     rows = list(MultiHeadDictReader(csvfile, header=header))
 
-    rows.insert(0, {})  # Fieldnames
+    for _ in range(header):
+        rows.insert(0, {})  # Fieldnames
     rows.insert(0, {})  # 1-origin
 
     print(f"{len(rows)-1} rows, numbered 2-{len(rows)-1}")
 
     comments = read_comments()
 
-    row = 2
+    row = header+1
     last_shown = None
 
     while True:
@@ -132,6 +133,6 @@ def main(header, csvfile):
                 if 2 <= nrow <= len(rows)-1:
                     row = nrow
                 else:
-                    print(f"Rows are numbered 2-{len(rows)-1}")
+                    print(f"Rows are numbered {header+1}-{len(rows)-1}")
 
 main()
