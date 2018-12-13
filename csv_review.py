@@ -5,8 +5,10 @@ import os.path
 import sys
 import textwrap
 
+import click
 import colorama
 from colorama import Fore, Back, Style
+
 
 def print_row(d):
     print(f"\n\n\n\n\n\n\n\n{Fore.YELLOW}{Style.BRIGHT}{'#'*100}{Style.RESET_ALL}{Fore.RESET}")
@@ -48,13 +50,15 @@ def add_comment(comments, rownum, comment):
     comments[rownum] = comment.strip()
     write_comments(comments)
 
-def main():
+@click.command()
+@click.option('--header', default=1, help="Row number with headers")
+@click.argument('csvfile', type=click.File('r'))
+def main(header, csvfile):
     colorama.init()
 
-    fname = sys.argv[1]
-
-    with open(fname) as f:
-        rows = list(csv.DictReader(f))
+    for _ in range(header-1):
+        next(csvfile)
+    rows = list(csv.DictReader(csvfile))
 
     rows.insert(0, {})  # Fieldnames
     rows.insert(0, {})  # 1-origin
