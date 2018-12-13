@@ -9,7 +9,7 @@ import colorama
 from colorama import Fore, Back, Style
 
 def print_row(d):
-    print(f"\n\n\n\n\n\n\n\n{Fore.YELLOW}{'#'*100}{Fore.RESET}")
+    print(f"\n\n\n\n\n\n\n\n{Fore.YELLOW}{Style.BRIGHT}{'#'*100}{Style.RESET_ALL}{Fore.RESET}")
     prev_post = ""
     for k, v in d.items():
         v = "\n".join(textwrap.fill(p, width=100) for p in v.splitlines())
@@ -116,6 +116,6 @@ def main():
                 if 2 <= nrow <= len(rows)-1:
                     row = nrow
                 else:
-                    print(f"There are {len(rows)} rows")
+                    print(f"Rows are numbered 2-{len(rows)-1}")
 
 main()
