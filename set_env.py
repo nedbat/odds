@@ -2,8 +2,13 @@
 #
 # Run this like:
 #
-#   $ $(lab/set_env.py)
+#   $ $(set_env.py)
 #
+# It looks through files in your tree for lines like this:
+#
+#   # $set_env.py: ENVVAR_NAME - Description of the environment variable.
+#
+# and prompts for values.  You can review, change, or delete values.
 
 import functools
 import glob
