@@ -22,21 +22,25 @@ pstderr = functools.partial(print, file=sys.stderr)
 
 SETTINGS = []
 
-def find_settings():
+def find_settings(args):
+    args = args or ["*.py", "**/*.py"]
     line_pattern = r"\$set_env.py: (\w+) - (.*)"
-    globs = "*/*.py *.py"
-
-    filenames = itertools.chain.from_iterable(glob.glob(g) for g in globs.split())
-    files = 0
+    settings = set()
+    filenames = [fname for glb in args for fname in glob.glob(glb, recursive=True)]
     for filename in filenames:
-        files += 1
         with open(filename) as f:
-            for line in f:
-                m = re.search(line_pattern, line)
-                if m:
-                    SETTINGS.append(m.groups())
-    SETTINGS.sort()
-    pstderr("Read {} files".format(files))
+            try:
+                for line in f:
+                    m = re.search(line_pattern, line)
+                    if m:
+                        settings.add(m.groups())
+            except UnicodeDecodeError:
+                # Probably wasn't a text file, ignore it.
+                pass
+
+    pstderr(f"Read {len(filenames)} files")
+    global SETTINGS
+    SETTINGS = sorted(settings)
 
 def read_them():
     values = {}
@@ -116,9 +120,9 @@ def as_exports(values):
             exports.append("export {}={!r}".format(name, value))
     return "eval " + "; ".join(exports)
 
-def main():
-    find_settings()
+def main(args):
+    find_settings(args)
     print(as_exports(get_new_values(read_them())))
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
