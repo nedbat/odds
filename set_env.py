@@ -17,8 +17,11 @@ import os
 import re
 import sys
 
-
-pstderr = functools.partial(print, file=sys.stderr)
+# Because of the way this tool is run, all user-visible output has to go to
+# stderr.  At the end, shell commands will be written to stdout.  To make this
+# convenient, we redefine print as stderr.
+pstdout = print
+print = functools.partial(print, file=sys.stderr)
 
 SETTINGS = []
 
@@ -38,7 +41,7 @@ def find_settings(args):
                 # Probably wasn't a text file, ignore it.
                 pass
 
-    pstderr(f"Read {len(filenames)} files")
+    print(f"Read {len(filenames)} files")
     global SETTINGS
     SETTINGS = sorted(settings)
 
@@ -57,7 +60,7 @@ def show_them(values):
         else:
             eq = '='
             value = repr(value)
-        pstderr("{:2d}: {:>30s} {} {:12s}   {}".format(i, name, eq, value, description))
+        print("{:2d}: {:>30s} {} {:12s}   {}".format(i, name, eq, value, description))
 
 def set_by_num(values, n, value):
     setting_name = SETTINGS[int(n)-1][0]
@@ -71,13 +74,13 @@ def get_new_values(values):
         if show:
             show_them(values)
             show = False
-            pstderr("")
-        pstderr(PROMPT, end='')
+            print("")
+        print(PROMPT, end='')
         sys.stderr.flush()
         try:
             cmd = input("").strip().split()
         except EOFError:
-            pstderr("\n")
+            print("\n")
             break
         if not cmd:
             continue
@@ -85,12 +88,12 @@ def get_new_values(values):
             break
         if cmd[0] == 'x':
             if len(cmd) < 2:
-                pstderr("Need numbers of entries to delete")
+                print("Need numbers of entries to delete")
                 continue
             try:
                 nums = map(int, cmd[1:])
             except ValueError:
-                pstderr("Need numbers of entries to delete")
+                print("Need numbers of entries to delete")
                 continue
             else:
                 for num in nums:
@@ -99,13 +102,13 @@ def get_new_values(values):
             try:
                 num = int(cmd[0])
             except ValueError:
-                pstderr("Don't understand option {!r}".format(cmd[0]))
+                print("Don't understand option {!r}".format(cmd[0]))
                 continue
             else:
                 if len(cmd) >= 2:
                     set_by_num(values, num, " ".join(cmd[1:]))
                 else:
-                    pstderr("Need a value to set")
+                    print("Need a value to set")
                     continue
         show = True
 
@@ -122,7 +125,7 @@ def as_exports(values):
 
 def main(args):
     find_settings(args)
-    print(as_exports(get_new_values(read_them())))
+    pstdout(as_exports(get_new_values(read_them())))
 
 if __name__ == '__main__':
     main(sys.argv[1:])
