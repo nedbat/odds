@@ -10,18 +10,11 @@
 #
 # and prompts for values.  You can review, change, or delete values.
 
-import functools
+import contextlib
 import glob
-import itertools
 import os
 import re
 import sys
-
-# Because of the way this tool is run, all user-visible output has to go to
-# stderr.  At the end, shell commands will be written to stdout.  To make this
-# convenient, we redefine print as stderr.
-pstdout = print
-print = functools.partial(print, file=sys.stderr)
 
 SETTINGS = []
 
@@ -124,8 +117,11 @@ def as_exports(values):
     return "eval " + "; ".join(exports)
 
 def main(args):
-    find_settings(args)
-    pstdout(as_exports(get_new_values(read_them())))
+    # All output has to go to stderr. Stdout will be executed.
+    with contextlib.redirect_stdout(sys.stderr):
+        find_settings(args)
+        exports = as_exports(get_new_values(read_them()))
+    print(exports)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
