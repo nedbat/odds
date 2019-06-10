@@ -111,7 +111,7 @@ def as_exports(values):
     exports = []
     for name, value in values.items():
         if value is None:
-            exports.append("export -n {}".format(name))
+            exports.append("typeset +x {}".format(name))
         else:
             exports.append("export {}={!r}".format(name, value))
     return "eval " + "; ".join(exports)
