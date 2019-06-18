@@ -55,11 +55,25 @@ def show_them(values):
             value = repr(value)
         print("{:2d}: {:>30s} {} {:12s}   {}".format(i, name, eq, value, description))
 
+def get_by_num(values, n):
+    setting_name = SETTINGS[int(n)-1][0]
+    return values[setting_name]
+
 def set_by_num(values, n, value):
     setting_name = SETTINGS[int(n)-1][0]
     values[setting_name] = value
 
-PROMPT = "(# value | x # | q) ::> "
+PROMPT = "(# [value] | x # ... | ? | q)> "
+HELP = """\
+Commands:
+    "#" means a number of an environment variable, from 1 to {maxnum}.
+
+    # value         - Give a value to a variable.
+    #               - Toggle a variable between empty and '1'
+    x # # ...       - Make variables to empty
+    ?               - Show this help
+    q               - Quit
+"""
 
 def get_new_values(values):
     show = True
@@ -77,9 +91,11 @@ def get_new_values(values):
             break
         if not cmd:
             continue
-        if cmd[0] == 'q':
+        elif cmd[0] == 'q':
             break
-        if cmd[0] == 'x':
+        elif cmd[0] == '?':
+            print(HELP.format(maxnum=len(SETTINGS)))
+        elif cmd[0] == 'x':
             if len(cmd) < 2:
                 print("Need numbers of entries to delete")
                 continue
@@ -101,8 +117,11 @@ def get_new_values(values):
                 if len(cmd) >= 2:
                     set_by_num(values, num, " ".join(cmd[1:]))
                 else:
-                    print("Need a value to set")
-                    continue
+                    if get_by_num(values, num):
+                        value = None
+                    else:
+                        value = '1'
+                    set_by_num(values, num, value)
         show = True
 
     return values
