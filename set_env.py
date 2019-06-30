@@ -70,7 +70,7 @@ Commands:
 
     # value         - Give a value to a variable.
     #               - Toggle a variable between empty and '1'
-    x # # ...       - Make variables to empty
+    x # # ...       - Unset variables
     ?               - Show this help
     q               - Quit
 """
