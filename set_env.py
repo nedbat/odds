@@ -2,13 +2,18 @@
 #
 # Run this like:
 #
-#   $ $(set_env.py)
+#   $ $(set_env.py FILE-GLOB ...)
 #
-# It looks through files in your tree for lines like this:
+# It looks through the specificed files for lines like this:
 #
 #   # $set_env.py: ENVVAR_NAME - Description of the environment variable.
 #
 # and prompts for values.  You can review, change, or delete values.
+#
+# Because it changes environment variables, you must run it inside $() as
+# shown.  This is handy in your shell startup file:
+#
+#   alias set_env='$(set_env.py $(git ls-files))'
 
 import contextlib
 import glob
