@@ -1,19 +1,34 @@
-# clipv | python twisty-console.py | gist -p -f console.md
+# Pipe a console session into this, and it outputs a GitHub markdown version
+# with the commands' output in collapsible <details> tags.
+#
+# clipv | python twisty_console.py "❯ " 2 | gist -p -f console.md
+#
+# The arguments are:
+#   prompt marker: the string at the end of your prompt. This must be distinctive
+#   lines before (optional): the number of extra lines in your prompt
 
+import html
 import sys
 
-PROMPT = "❯ "
-NBEFORE = 2
+def main(prompt, nbefore=0):
+    text = sys.stdin.read()
+    print(make_twisty(text, prompt, int(nbefore)))
 
-text = sys.stdin.read().splitlines()
-prompt_line_nums = [n for n, line in enumerate(text) if PROMPT.rstrip() in line]
+def make_twisty(text, prompt, nbefore):
+    lines = text.splitlines()
+    twisty = []
+    twprint = twisty.append
+    prompt_line_nums = [n for n, line in enumerate(lines) if prompt.rstrip() in line]
 
-for pnum, npnum in zip(prompt_line_nums, prompt_line_nums[1:] + [-1]):
-    prompt_line = text[pnum].partition(PROMPT)[2]
-    if not prompt_line.strip():
-        continue
-    print(f"<details>\n<summary>{prompt_line}</summary>\n")
-    print("```")
-    output = "\n".join(text[pnum+1:npnum-NBEFORE])
-    print(output)
-    print("```\n\n</details>\n")
+    for pnum, npnum in zip(prompt_line_nums, prompt_line_nums[1:] + [-1]):
+        prompt_line = lines[pnum].partition(prompt)[2]
+        if not prompt_line.strip():
+            continue
+        twprint(f"<details>\n<summary>{html.escape(prompt_line)}</summary>\n")
+        twprint("```")
+        output = "\n".join(lines[pnum+1:npnum-nbefore])
+        twprint(output)
+        twprint("```\n\n</details>\n")
+    return "\n".join(twisty) + "\n"
+
+main(*sys.argv[1:])
