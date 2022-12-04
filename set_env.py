@@ -144,8 +144,14 @@ def main(args):
     # All output has to go to stderr. Stdout will be executed.
     with contextlib.redirect_stdout(sys.stderr):
         find_settings(args)
-        exports = as_exports(get_new_values(read_them()))
-    print(exports)
+        values = read_them()
+        if values:
+            values = get_new_values(values)
+        else:
+            print("No settings found!")
+
+    if values:
+        print(as_exports(values))
 
 if __name__ == '__main__':
     main(sys.argv[1:])
