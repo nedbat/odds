@@ -1,0 +1,67 @@
+% Draw figurate number diagrams
+
+/nsides argv 1 get cvi def
+/side-len argv 2 get cvi def
+
+/drawing-size 200 def
+/dot-radius 5 def
+/ring-radius drawing-size 2 div .80 mul side-len 1 sub div def
+
+/dot-stroke {
+    1 setlinewidth
+    0 setgray
+    stroke
+} def
+
+/dot-fill {
+    1 0 0 setrgbcolor
+    fill
+} def
+
+/dot {
+    gsave
+        dot-radius 0 360 arc
+        gsave dot-fill grestore
+        gsave dot-stroke grestore
+        grestore
+} def
+
+/tan { dup sin exch cos div } def
+
+/triangle {
+    /half-angle 180 nsides div def
+    /vert-step half-angle tan def
+    gsave
+        /outer-x ring-radius side-len 1 sub mul def
+        /outer-y outer-x vert-step mul def
+        0 0 moveto
+        outer-x outer-y lineto
+        outer-x outer-y neg lineto
+        closepath
+        .5 setgray
+        .5 setlinewidth
+        stroke
+        grestore
+    0 1 side-len 1 sub {
+        /nring exch def
+        /radius nring ring-radius mul def
+        0 1 nring {
+            /ndot exch def
+            radius
+            vert-step radius mul
+            nring 0 ne {
+                1 ndot nring div 2 mul sub mul
+            } if
+            dot
+        } for
+    } for
+} def
+
+drawing-size 2 div dup translate
+
+0 1 nsides {
+    360 nsides div rotate
+    triangle
+} for
+
+showpage
