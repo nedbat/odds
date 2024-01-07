@@ -68,14 +68,14 @@ def set_by_num(values, n, value):
     setting_name = SETTINGS[int(n)-1][0]
     values[setting_name] = value
 
-PROMPT = "(# [value] | x # ... | ? | q)> "
+PROMPT = "## [value] | w fname | ? | q > "
 HELP = """\
 Commands:
-    "#" means a number of an environment variable, from 1 to {maxnum}.
+    "##" means a number of an environment variable, from 1 to {maxnum}.
 
-    # value         - Give a value to a variable.
-    #               - Toggle a variable between empty and '1'
-    x # # ...       - Unset variables
+    ## value        - Give a value to a variable
+    ##              - Toggle a variable between empty and '1'
+    w fname         - Write the values to a source-able file
     ?               - Show this help
     q               - Quit
 """
@@ -96,22 +96,15 @@ def get_new_values(values):
             break
         if not cmd:
             continue
+        elif cmd[0] == 'w':
+            fname = cmd[1]
+            with open(fname, "w") as out:
+                for line in as_exports(values):
+                    print(line, file=out)
         elif cmd[0] == 'q':
             break
         elif cmd[0] == '?':
             print(HELP.format(maxnum=len(SETTINGS)))
-        elif cmd[0] == 'x':
-            if len(cmd) < 2:
-                print("Need numbers of entries to delete")
-                continue
-            try:
-                nums = map(int, cmd[1:])
-            except ValueError:
-                print("Need numbers of entries to delete")
-                continue
-            else:
-                for num in nums:
-                    set_by_num(values, num, None)
         else:
             try:
                 num = int(cmd[0])
@@ -138,7 +131,7 @@ def as_exports(values):
             exports.append("typeset +x {}".format(name))
         else:
             exports.append("export {}={!r}".format(name, value))
-    return "eval " + "; ".join(exports)
+    return exports
 
 def main(args):
     # All output has to go to stderr. Stdout will be executed.
@@ -151,7 +144,7 @@ def main(args):
             print("No settings found!")
 
     if values:
-        print(as_exports(values))
+        print("eval " + "; ".join(as_exports(values)))
 
 if __name__ == '__main__':
     main(sys.argv[1:])
