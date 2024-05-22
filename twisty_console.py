@@ -1,24 +1,31 @@
 # Pipe a console session into this, and it outputs a GitHub markdown version
 # with the commands' output in collapsible <details> tags.
 #
-# clipv | python twisty_console.py "❯ " 2 | gist -p -f console.md
+# clipv | python twisty_console.py "% " 2 "^%" | gist -p -f console.md
 #
 # The arguments are:
 #   prompt marker: the string at the end of your prompt. This must be distinctive
 #   lines before (optional): the number of extra lines in your prompt
+#   regex (optional): the regex to match a prompt
 
 import html
+import re
 import sys
 
-def main(prompt, nbefore=0):
+def main(prompt, nbefore=0, rxprompt=None):
     text = sys.stdin.read()
-    print(make_twisty(text, prompt, int(nbefore)))
+    print(make_twisty(
+        text,
+        prompt,
+        int(nbefore),
+        rxprompt or prompt,
+    ))
 
-def make_twisty(text, prompt, nbefore):
+def make_twisty(text, prompt, nbefore, rxprompt):
     lines = text.splitlines()
     twisty = []
     twprint = twisty.append
-    prompt_line_nums = [n for n, line in enumerate(lines) if prompt.rstrip() in line]
+    prompt_line_nums = [n for n, line in enumerate(lines) if re.search(rxprompt, line)]
 
     for pnum, npnum in zip(prompt_line_nums, prompt_line_nums[1:] + [-1]):
         prompt_line = lines[pnum].partition(prompt)[2]
