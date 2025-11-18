@@ -4,7 +4,7 @@
 #
 #   $ $(set_env.py FILE-GLOB ...)
 #
-# It looks through the specificed files for lines like this:
+# It looks through the specified files for lines like this:
 #
 #   # $set_env.py: ENVVAR_NAME - Description of the environment variable.
 #
@@ -29,7 +29,12 @@ def find_settings(args):
     settings = set()
     filenames = [fname for glb in args for fname in glob.glob(glb, recursive=True)]
     for filename in filenames:
-        with open(filename) as f:
+        try:
+            f = open(filename)
+        except OSError:
+            # Could happen if filename is a directory.
+            continue
+        with f:
             try:
                 for line in f:
                     m = re.search(line_pattern, line)
