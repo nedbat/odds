@@ -4,6 +4,8 @@ import dataclasses
 import itertools
 import random
 
+from typing import Callable
+
 
 @dataclasses.dataclass
 class Tile:
@@ -114,28 +116,45 @@ MOVES = {
 }
 
 
-def game():
-    board = Board()
+def game(
+    size: int,
+    goal: int,
+    output_fn: Callable[[Board], None],
+    move_fn: Callable[[int], str],
+) -> bool:
+    board = Board(size=size)
     board.add_random_tile()
     board.add_random_tile()
     score = 0
 
-    print("Welcome! Your goal is to get a 2048 tile.")
-    print("Moves: 'a' left, 's' down, 'd' right, 'w' up.")
     while True:
-        board.draw()
+        output_fn(board)
         if not board.any_move():
-            print("You lose")
-            break
-        if board.max_number() == 2048:
-            print("You win!")
-            break
-        move = input(f"{score} Move> ")
+            return False
+        if board.max_number() == goal:
+            return True
+        move = move_fn(score)
         if move in MOVES:
             any_moved, merged = board.slide(*MOVES[move])
             if any_moved:
                 score += merged
                 board.add_random_tile()
+
+
+def interactive_game():
+    print("Welcome! Your goal is to get a 2048 tile.")
+    print("Moves: 'a' left, 's' down, 'd' right, 'w' up.")
+
+    def move_fn(score):
+        return input(f"{score} Move> ")
+
+    def output_fn(board):
+        board.draw()
+
+    if game(size=4, goal=2048, output_fn=output_fn, move_fn=move_fn):
+        print("You win!")
+    else:
+        print("You lose!")
 
 
 def board_from_list(numss):
@@ -148,4 +167,4 @@ def board_from_list(numss):
 
 
 if __name__ == "__main__":
-    game()
+    interactive_game()
