@@ -3,6 +3,7 @@
 import dataclasses
 import itertools
 import random
+import sys
 
 from typing import Callable
 
@@ -157,6 +158,38 @@ def interactive_game():
         print("You lose!")
 
 
+def not_or(b: bool) -> str:
+    return "" if b else "not "
+
+
+def jit_stat() -> str:
+    try:
+        jit = sys._jit
+        if not jit.is_available():
+            return "n/a"
+    except AttributeError:
+        return "n/a"
+    else:
+        return f"{not_or(jit.is_enabled())}enabled, {not_or(jit.is_active())}active"
+
+
+def bot_games(ngames: int, size: int, goal: int) -> bool:
+    def move_fn(score):
+        return random.choice(list(MOVES.keys()))
+
+    wins = 0
+    for g in range(ngames):
+        if game(size=size, goal=goal, output_fn=lambda b: None, move_fn=move_fn):
+            wins += 1
+        print(
+            f"\rCompleted {g + 1}/{ngames} {size}->{goal} games, "
+            + f"{wins} wins, {g + 1 - wins} losses, jit: {jit_stat()}",
+            end="             ",
+        )
+    print()
+    print(f"Bot won {wins} out of {ngames} {size}->{goal} games.")
+
+
 def board_from_list(numss):
     board = Board()
     for row, cols in enumerate(numss):
@@ -167,4 +200,13 @@ def board_from_list(numss):
 
 
 if __name__ == "__main__":
-    interactive_game()
+    match sys.argv[1:]:
+        case []:
+            interactive_game()
+        case ["bot", size, goal]:
+            bot_games(1000, size=int(size), goal=int(goal))
+        case ["bot"]:
+            for exp in range(13, 17):
+                bot_games(1000, size=7, goal=2**exp)
+        case _:
+            print("Usage: 2048.py [bot]")
