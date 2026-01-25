@@ -9,10 +9,9 @@ class Tile:
     num: int
     merged: bool = False
 
-N = 4
-
 class Board:
-    def __init__(self):
+    def __init__(self, size=4):
+        self.n = size
         self.tiles: dict[tuple[int, int], Tile] = {}
 
     def draw(self):
@@ -30,9 +29,9 @@ class Board:
             "║      ║",
             "╚══════╝",
         ]
-        for row in range(N):
+        for row in range(self.n):
             for rowrow in range(5):
-                for col in range(N):
+                for col in range(self.n):
                     tile = self.tiles.get((col, row))
                     if tile is None:
                         print(SPACE_PARTS[rowrow], end="")
@@ -44,17 +43,17 @@ class Board:
                 print()
 
     def add_random_tile(self):
-        all_squares = set(itertools.product(range(N), repeat=2))
+        all_squares = set(itertools.product(range(self.n), repeat=2))
         empties = list(all_squares - self.tiles.keys())
         empty = random.choice(empties)
         num = 2 if random.random() < .9 else 4
         self.tiles[empty] = Tile(num)
 
     def slide(self, dx, dy):
-        cols = range(N)
+        cols = range(self.n)
         if dx == 1:
             cols = reversed(cols)
-        rows = range(N)
+        rows = range(self.n)
         if dy == 1:
             rows = reversed(rows)
 
@@ -67,7 +66,7 @@ class Board:
             while True:
                 ncol = col + dx
                 nrow = row + dy
-                if (ncol not in range(N)) or (nrow not in range(N)):
+                if (ncol not in range(self.n)) or (nrow not in range(self.n)):
                     break
                 next_tile = self.tiles.get((ncol, nrow))
                 if next_tile is None:
@@ -90,10 +89,10 @@ class Board:
         return any_moved, merged
 
     def any_move(self):
-        if len(self.tiles) < N * N:
+        if len(self.tiles) < self.n * self.n:
             return True
-        for row in range(N):
-            for col in range(N):
+        for row in range(self.n):
+            for col in range(self.n):
                 tile = self.tiles[(col, row)]
                 for dx, dy in MOVES.values():
                     ntile = self.tiles.get((col + dx, row + dy))
