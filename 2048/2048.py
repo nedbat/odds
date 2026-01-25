@@ -4,10 +4,12 @@ import dataclasses
 import itertools
 import random
 
+
 @dataclasses.dataclass
 class Tile:
     num: int
     merged: bool = False
+
 
 class Board:
     def __init__(self, size=4):
@@ -46,7 +48,7 @@ class Board:
         all_squares = set(itertools.product(range(self.n), repeat=2))
         empties = list(all_squares - self.tiles.keys())
         empty = random.choice(empties)
-        num = 2 if random.random() < .9 else 4
+        num = 2 if random.random() < 0.9 else 4
         self.tiles[empty] = Tile(num)
 
     def slide(self, dx, dy):
@@ -103,12 +105,14 @@ class Board:
     def max_number(self):
         return max(self.tiles.values(), key=lambda t: t.num).num
 
+
 MOVES = {
     "w": (0, -1),
     "a": (-1, 0),
     "s": (0, 1),
     "d": (1, 0),
 }
+
 
 def game():
     board = Board()
@@ -133,6 +137,7 @@ def game():
                 score += merged
                 board.add_random_tile()
 
+
 def board_from_list(numss):
     board = Board()
     for row, cols in enumerate(numss):
@@ -140,6 +145,7 @@ def board_from_list(numss):
             if num:
                 board.tiles[(col, row)] = Tile(num)
     return board
+
 
 if __name__ == "__main__":
     game()
