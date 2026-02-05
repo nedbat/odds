@@ -3,6 +3,7 @@ Change every module page in the CPython docs
 so that the title doesn't link to itself.
 """
 
+import re
 from pathlib import Path
 
 # Edge cases:
@@ -19,7 +20,7 @@ from pathlib import Path
 # - pages with two links in the title!
 #       copyreg.rst
 
-def fix_one_file(fpath):
+def fix_title_in_one_file(fpath):
     text = fpath.read_text().lstrip()
     if not text.startswith(":mod:`"):
         return
@@ -34,5 +35,19 @@ def fix_one_file(fpath):
     fpath.write_text("".join(lines))
     print(f"Updated {fpath}")
 
-for fname in Path(".").glob("**/*.rst"):
-    fix_one_file(fname)
+def fix_self_references_in_one_file(fpath):
+    text = fpath.read_text()
+    top_line = text.splitlines()[0]
+    if not (m := re.search(r"^:mod:`!?([\w\.]+)`", top_line)):
+        return
+    modname = m[1]
+    newtext = text.replace(f":mod:`{modname}`", f":mod:`!{modname}`")
+    # Note: this doesn't fix header underscores, those will have to be fixed by
+    # hand, but there won't be many.
+    if newtext != text:
+        fpath.write_text(newtext)
+        print(f"Updated self-references in {fpath}")
+
+for fpath in Path(".").glob("**/*.rst"):
+    fix_title_in_one_file(fpath)
+    fix_self_references_in_one_file(fpath)
