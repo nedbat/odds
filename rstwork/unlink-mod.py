@@ -36,16 +36,22 @@ def fix_title_in_one_file(fpath):
     print(f"Updated {fpath}")
 
 def fix_self_references_in_one_file(fpath):
-    text = fpath.read_text()
-    top_line = text.splitlines()[0]
-    if not (m := re.search(r"^:mod:`!?([\w\.]+)`", top_line)):
+    lines = fpath.read_text().splitlines(keepends=True)
+    if not (m := re.search(r"^:mod:`!?([\w\.]+)`", lines[0])):
         return
     modname = m[1]
-    newtext = text.replace(f":mod:`{modname}`", f":mod:`!{modname}`")
-    # Note: this doesn't fix header underscores, those will have to be fixed by
-    # hand, but there won't be many.
-    if newtext != text:
-        fpath.write_text(newtext)
+    changed = False
+    for i, line in enumerate(lines):
+        if f":mod:`{modname}`" in line:
+            new_line = line.replace(f":mod:`{modname}`", f":mod:`!{modname}`")
+            lines[i] = new_line
+            changed = True
+            if i < len(lines) - 1:
+                next_line = lines[i + 1] 
+                if len(next_line) == len(line) and len(set(next_line.rstrip())) == 1:
+                    lines[i + 1] = next_line[0] * len(new_line.rstrip()) + next_line[-1]
+    if changed:
+        fpath.write_text("".join(lines))
         print(f"Updated self-references in {fpath}")
 
 for fpath in Path(".").glob("**/*.rst"):
